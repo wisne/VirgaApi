@@ -30,3 +30,11 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     JMS\Serializer\SerializerInterface: '@jms_serializer'
+
+    App\Api\Doctrine\ODM\Extension\:
+        resource: '../src/Api/Doctrine/ODM/Extension' 
+        tags: ['api.doctrine.odm.extension.pagination']
+
+    App\Api\Doctrine\ODM\CollectionDataProvider:
+        arguments:
+             $collectionExtensions: !tagged api.doctrine.odm.extension.pagination

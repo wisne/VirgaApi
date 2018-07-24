@@ -9,6 +9,7 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 use JMS\Serializer\SerializerInterface;
 use JMS\Serializer\SerializationContext;
 use App\Document\Product;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Util\QueryNameGenerator;
 
 /**
  * Collection data provider for the Doctrine MongoDB ODM.
@@ -37,7 +38,7 @@ class CollectionDataProvider implements CollectionDataProviderInterface, Restric
     /**
      * {@inheritdoc}
      */
-    public function getCollection(string $resourceClass, string $operationName = null)
+    public function getCollection(string $resourceClass, string $operationName = null,array $context = [])
     {
         $manager = $this->managerRegistry;
 
@@ -47,9 +48,22 @@ class CollectionDataProvider implements CollectionDataProviderInterface, Restric
             throw new RuntimeException('The repository class must have a "createQueryBuilder" method.');
         }
 
+        $queryBuilder = $repository->createQueryBuilder('o');
+
+        $queryNameGenerator = new QueryNameGenerator();
+       
+
+        foreach ($this->collectionExtensions as $extension) {
+           
+            $extension->applyToCollection($queryBuilder, $queryNameGenerator, $resourceClass, $operationName, $context);
+            if ($extension instanceof QueryResultCollectionExtensionInterface && $extension->supportsResult($resourceClass, $operationName, $context)) {
+                
+                return $extension->getResult($queryBuilder, $resourceClass, $operationName, $context);
+            }
+        }
         
 
-        $query = $repository->createQueryBuilder()->getQuery()->execute()->toArray();
+        $query = $queryBuilder->getQuery()->execute()->toArray();
 
         $data = $this->serializer->serialize($query, 'json', SerializationContext::create()->enableMaxDepthChecks());
      
