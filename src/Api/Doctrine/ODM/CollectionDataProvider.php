@@ -10,6 +10,7 @@ use JMS\Serializer\SerializerInterface;
 use JMS\Serializer\SerializationContext;
 use App\Document\Product;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Util\QueryNameGenerator;
+use App\Api\Doctrine\ODM\Extension\QueryResultCollectionExtensionInterface;
 
 /**
  * Collection data provider for the Doctrine MongoDB ODM.
@@ -56,9 +57,16 @@ class CollectionDataProvider implements CollectionDataProviderInterface, Restric
         foreach ($this->collectionExtensions as $extension) {
            
             $extension->applyToCollection($queryBuilder, $queryNameGenerator, $resourceClass, $operationName, $context);
+            
             if ($extension instanceof QueryResultCollectionExtensionInterface && $extension->supportsResult($resourceClass, $operationName, $context)) {
-                
-                return $extension->getResult($queryBuilder, $resourceClass, $operationName, $context);
+              
+                $query = $extension->getResult($queryBuilder, $resourceClass, $operationName, $context);
+
+                $results = $query->execute()->toArray();
+
+                $data = $this->serializer->serialize($results, 'json', SerializationContext::create()->enableMaxDepthChecks());
+     
+                return json_decode($data, true);
             }
         }
         
