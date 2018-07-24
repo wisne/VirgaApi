@@ -97,7 +97,7 @@ class ProductCategory
     /**
      * Get the value of parent
      */ 
-    public function getParent() : ProductCategory
+    public function getParent() : ?ProductCategory
     {
         return $this->parent;
     }

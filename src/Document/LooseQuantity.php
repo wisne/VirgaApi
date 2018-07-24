@@ -11,10 +11,10 @@ use Doctrine\ORM\Mapping\DiscriminatorMap;
 /**
  * @MongoDB\EmbeddedDocument
  */
-class LooseQuantity extends ProductQuantity{
+class LooseQuantity{
 
     /**
-     * @MongoDB\Field
+     * @MongoDB\Field(type="string")
      */
     protected $unitName;
 
@@ -39,7 +39,7 @@ class LooseQuantity extends ProductQuantity{
      /**
      * Get the value of unitName
      */ 
-    public function getUnitName()
+    public function getUnitName() : string
     {
         return $this->unitName;
     }

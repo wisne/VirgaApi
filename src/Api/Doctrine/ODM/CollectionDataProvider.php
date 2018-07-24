@@ -1,44 +1,58 @@
 <?php
 namespace App\Api\Doctrine\ODM;
 
-
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Extension\QueryResultCollectionExtensionInterface;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Util\QueryNameGenerator;
 use ApiPlatform\Core\Exception\RuntimeException;
-use App\Document\Product;
 use ApiPlatform\Core\Exception\ResourceClassNotSupportedException;
 use ApiPlatform\Core\DataProvider\CollectionDataProviderInterface;
+use ApiPlatform\Core\DataProvider\RestrictedDataProviderInterface;
 use Doctrine\ODM\MongoDB\DocumentManager;
-
+use JMS\Serializer\SerializerInterface;
+use JMS\Serializer\SerializationContext;
+use App\Document\Product;
 
 /**
  * Collection data provider for the Doctrine MongoDB ODM.
  */
-class CollectionDataProvider implements CollectionDataProviderInterface
+class CollectionDataProvider implements CollectionDataProviderInterface, RestrictedDataProviderInterface
 {
     private $managerRegistry;
     private $collectionExtensions;
-   
-    /**
-     * @param ManagerRegistry                      $managerRegistry
-     * @param QueryCollectionExtensionInterface[]  $collectionExtensions
-     * @param CollectionDataProviderInterface|null $decorated
-     */
-    public function __construct(DocumentManager $managerRegistry)
+    private $serializer;
+
+    public function __construct(DocumentManager $managerRegistry, SerializerInterface $serializer, $collectionExtensions = [])
     {
         $this->managerRegistry = $managerRegistry;
-      
-        
+
+        $this->serializer = $serializer;
+
+        $this->collectionExtensions = $collectionExtensions;
     }
+
+    public function supports(string $resourceClass, string $operationName = null, array $context = []): bool
+    {
+        return $this->managerRegistry->getRepository($resourceClass) != null;
+    }
+
+
     /**
      * {@inheritdoc}
      */
     public function getCollection(string $resourceClass, string $operationName = null)
     {
-       $manager = $this->managerRegistry;
+        $manager = $this->managerRegistry;
 
-        $query = $manager->getRepository($resourceClass)->createQueryBuilder()->hydrate(false)->getQuery()->getSingleResult();
+        $repository =  $manager->getRepository($resourceClass);
+
+        if (!method_exists($repository, 'createQueryBuilder')) {
+            throw new RuntimeException('The repository class must have a "createQueryBuilder" method.');
+        }
+
+        
+
+        $query = $repository->createQueryBuilder()->getQuery()->execute()->toArray();
+
+        $data = $this->serializer->serialize($query, 'json', SerializationContext::create()->enableMaxDepthChecks());
      
-        return $query;
+        return json_decode($data, true);
     }
 }
