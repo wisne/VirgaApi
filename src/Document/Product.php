@@ -11,6 +11,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use JMS\Serializer\Annotation\MaxDepth;
 use JMS\Serializer\Annotation\Type;
 
+
 /**
  * @MongoDB\Document(collection="products")
  * @ApiResource
@@ -141,10 +142,23 @@ class Product
 
     /**
      * Get the value of categories
+     * @return ProductCategory[]
      */ 
-    public function getCategories()
+    public function getCategories() 
     {
         return $this->categories;
+    }
+
+    /**
+     * Set Categories
+     * 
+     * @return self
+     */
+    public function setCategories(array $categories)
+    {
+        $this->categories = $categories;
+
+        return $this;
     }
 
     /**
@@ -152,7 +166,7 @@ class Product
      *
      * @return  self
      */ 
-    public function addCategories($categories)
+    public function addCategories(array $categories)
     {
         $this->categories[] = $categories;
 
@@ -172,7 +186,7 @@ class Product
      *
      * @return  self
      */ 
-    public function setQuantity($quantity)
+    public function setQuantity($quantity) 
     {
         $this->quantity = $quantity;
 
@@ -182,7 +196,7 @@ class Product
     /**
      * Get the value of seller
      */ 
-    public function getSeller()
+    public function getSeller() : User
     {
         return $this->seller;
     }
@@ -192,7 +206,7 @@ class Product
      *
      * @return  self
      */ 
-    public function setSeller($seller)
+    public function setSeller(User $seller)
     {
         $this->seller = $seller;
 

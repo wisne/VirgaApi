@@ -5,18 +5,25 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\Bundle\MongoDBBundle\Validator\Constraints\Unique as MongoDBUnique;
 use Symfony\Component\Security\Core\User\UserInterface;
+use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiProperty;
 
 /**
  * @MongoDB\Document(collection="users")
  * @MongoDBUnique(fields={"email","phone"})
+ * @ApiResource
  */
 
  class User implements UserInterface
  {
      /**
       * @MongoDB\Id
+      * @ApiProperty(identifier=true)
       */
      protected $id;
+
+    
+     protected $username;
 
      /**
       * @MongoDB\Field(type="string")
@@ -97,7 +104,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
      /**
       * Get the value of email
       */ 
-     public function getEmail()
+     public function getEmail() : string
      {
           return $this->email;
      }
@@ -117,7 +124,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
      /**
       * Get the value of password
       */ 
-     public function getPassword()
+     public function getPassword() : string
      {
           return $this->password;
      }
@@ -137,7 +144,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
      /**
       * Get the value of phone
       */ 
-     public function getPhone()
+     public function getPhone() : string
      {
           return $this->phone;
      }
@@ -222,7 +229,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
     /**
      * Get the value of registrationDate
      */ 
-    public function getRegistrationDate()
+    public function getRegistrationDate(): \DateTime
     {
         return $this->registrationDate;
     }
@@ -232,7 +239,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
      *
      * @return  self
      */ 
-    public function setRegistrationDate($registrationDate)
+    public function setRegistrationDate($registrationDate) 
     {
         $this->registrationDate = $registrationDate;
 
@@ -241,8 +248,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
      /**
       * Get the value of addresses
+      * @return Address[]
       */ 
-     public function getAddresses()
+     public function getAddresses() 
      {
           return $this->addresses;
      }

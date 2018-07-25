@@ -1,13 +1,45 @@
 security:
+    encoders:
+            App\Document\User: plaintext
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
+        chain_provider:
+            chain:
+                providers: [main_phone_provider,main_email_provider]
         in_memory: { memory: ~ }
+        main_phone_provider:
+            mongodb: {class: App\Document\User,property: phone}
+        main_email_provider:
+            mongodb: {class: App\Document\User,property: email}
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+       
+        api_login:
+            pattern: ^/api/login
+            stateless: true
+            anonymous: true
+            provider: chain_provider
+            json_login:
+                check_path: /api/login_check
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            
+        api:
+            pattern:   ^/appp
+            stateless: true
+            provider: chain_provider
+            guard:
+                authenticators:
+                    - lexik_jwt_authentication.jwt_token_authenticator
+
         main:
             anonymous: true
+
+
+
 
             # activate different ways to authenticate
 
@@ -22,3 +54,5 @@ security:
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
+        #- { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        #- { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }

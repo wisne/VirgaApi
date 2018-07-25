@@ -10,6 +10,7 @@
         "doctrine/annotations": "^1.6",
         "doctrine/mongodb-odm-bundle": "^3.0",
         "jms/serializer-bundle": "^2.4",
+        "lexik/jwt-authentication-bundle": "^2.5",
         "symfony/apache-pack": "^1.0",
         "symfony/console": "^4.1",
         "symfony/flex": "^1.0",
